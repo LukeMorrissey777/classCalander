@@ -62,7 +62,7 @@ export default class AddClass extends Component {
     });
   };
   formatDays = () => {
-    var days = "0";
+    let days = "0";
     this.state.M ? (days += "1") : (days += "0");
     this.state.T ? (days += "1") : (days += "0");
     this.state.W ? (days += "1") : (days += "0");
