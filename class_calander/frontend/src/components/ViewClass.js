@@ -53,6 +53,7 @@ export default class ViewClass extends Component {
     this.state = {
       classes: null,
       checked: null,
+      codes: null,
     };
   }
   componentDidMount() {
@@ -80,7 +81,6 @@ export default class ViewClass extends Component {
   };
 
   formatTime = (time) => {
-    console.log(time);
     let hours = parseInt(time.slice(0, 2));
     if (hours < 12) {
       return time + " AM";
@@ -97,6 +97,7 @@ export default class ViewClass extends Component {
   formatCourses = (courses) => {
     let rows = [];
     let s = [];
+    let c = [];
     for (let i = 0; i < courses.length; i++) {
       rows.push({
         id: i + 1,
@@ -107,9 +108,11 @@ export default class ViewClass extends Component {
         zoom: courses[i].zoom,
       });
       s.push(false);
+      c.push(courses[i].code);
     }
     this.setState({
       checked: s,
+      codes: c,
     });
     return rows;
   };
@@ -149,6 +152,33 @@ export default class ViewClass extends Component {
         });
       });
   };
+  handleDeleteButtonsPressed = () => {
+    let c = [];
+    let found = false;
+    for (let i = 0; i < this.state.checked.length; i++) {
+      if (this.state.checked[i]) {
+        c.push(this.state.codes[i]);
+        found = true;
+      }
+    }
+    if (!found) {
+      return;
+    }
+    for (let i = 0; i < c.length; i++) {
+      const requestOptions = {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          code: c[i],
+        }),
+      };
+      fetch("api/delete-course", requestOptions).then(() => {
+        if (i == c.length - 1) {
+          window.location.reload();
+        }
+      });
+    }
+  };
   handleCheckButtonsPressed = (e) => {
     let temp = [];
     for (let i = 0; i < this.state.checked.length; i++) {
@@ -163,10 +193,17 @@ export default class ViewClass extends Component {
   };
   renderNoCourses = () => {
     return (
-      <Grid item xs={12} align="center">
-        <Typography variant="h3" compact="h3">
-          You have not added any classes!
-        </Typography>
+      <Grid container spacing={3}>
+        <Grid item xs={12} align="center">
+          <Typography variant="h3" compact="h3">
+            You have not added any classes!
+          </Typography>
+        </Grid>
+        <Grid item xs={12} align="center">
+          <Button variant="contained" color="secondary" to="/" component={Link}>
+            Back
+          </Button>
+        </Grid>
       </Grid>
     );
   };
@@ -191,8 +228,7 @@ export default class ViewClass extends Component {
           <Button
             variant="contained"
             color="secondary"
-            to="/class-view"
-            component={Link}
+            onClick={this.handleDeleteButtonsPressed}
           >
             Delete Selected Classes
           </Button>

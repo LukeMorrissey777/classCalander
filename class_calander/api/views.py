@@ -2,9 +2,10 @@ from django.http import response
 from django.shortcuts import render
 from rest_framework import generics, serializers,status
 from .models import Course
-from .serializer import CourseSerializer, AddCourseSerializer
+from .serializer import CourseSerializer, AddCourseSerializer, DeleteCourseSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
+
 # Create your views here.
 
 
@@ -42,3 +43,17 @@ class GetCoursesView(APIView):
                 data.append(CourseSerializer(course).data)
             return Response(data,status=status.HTTP_200_OK)
         return Response({'Bad Request':'No Classes for User'},status=status.HTTP_400_BAD_REQUEST)
+
+class DeleteCourseView(APIView):
+    serializer_class = DeleteCourseSerializer
+    def post(self,request,format=None):
+        if not self.request.session.exists(self.request.session.session_key):
+            self.request.session.create()
+        serializer = self.serializer_class(data = request.data)
+        if serializer.is_valid():
+            code = serializer.data.get('code')
+            course = Course.objects.filter(code=code)
+            if len(course)>0:
+                course[0].delete()
+            return Response({"Message":"Success"},status=status.HTTP_200_OK)
+        return Response({'Bad Request': 'Invalid data...'}, status=status.HTTP_400_BAD_REQUEST)

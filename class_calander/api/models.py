@@ -20,7 +20,7 @@ class Course(models.Model):
     class_days = models.CharField(max_length=7, default='0000000')    #days when classes are held(0 for no class 1 for class)
     start_time = models.CharField(max_length=5)
     class_duration = models.IntegerField(null=False,default=50)
-    code = models.CharField(max_length=8,default=generate_unique_code,unique=True)
+    code = models.CharField(max_length=8,default=generate_unique_code,unique=False)
 
 
      
